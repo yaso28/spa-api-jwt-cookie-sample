@@ -3,6 +3,7 @@
 
 - [プロジェクト新規作成](#プロジェクト新規作成)
 - [環境変数設定](#環境変数設定)
+- [CORS対応](#cors対応)
 
 ## プロジェクト新規作成
 
@@ -81,4 +82,57 @@ touch .env
 PORT=8000
 ```
 
-> ポート8000で実行するように設定します。
+> ここではポート8000で実行するように設定しています。
+
+## CORS対応
+
+SPAとAPIでドメインが異なる場合に備えて、CORS対応をします。
+
+> CORSの詳細は[こちら](https://developer.mozilla.org/ja/docs/Web/HTTP/CORS)
+
+CORSのmiddlewareを作成します。
+
+```bash
+mkdir middlewares
+touch middlewares/myCors.js
+```
+
+```js:middlewares/myCors.js
+const myCors = (req, res, next) => {
+  if (process.env.CORS_ALLOW_ORIGIN) {
+    // CORS対応
+    res.header('Access-Control-Allow-Origin', process.env.CORS_ALLOW_ORIGIN);
+    // Cookieを利用可能にします
+    res.header('Access-Control-Allow-Credentials', true);
+
+    if (req.method === 'OPTIONS') {
+      // Preflight Request対応
+      res.header('Access-Control-Allow-Methods', '*');
+      res.header('Access-Control-Allow-Headers', '*');
+      return res.status(204).end();
+    }
+  }
+
+  next();
+}
+
+module.exports = myCors;
+```
+
+`.env`を編集して、CORSの設定を追加します。
+
+```:.env
+CORS_ALLOW_ORIGIN=http://localhost:3000
+```
+
+> ここではSPAをhttpにてポート3000で実行する想定で `http://localhost:3000` と設定しています。
+
+`app.js`を編集して、CORSのmiddlewareを読み込みます。
+
+```js:app.js
+app.use(cookieParser());
+// 下記1行を追加します。
+app.use(require('./middlewares/myCors'));
+
+app.use('/', require('./routes/index'));
+```

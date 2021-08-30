@@ -4,10 +4,11 @@
 - [ローカルでの利用方法](#ローカルでの利用方法)
   - [api1](#api1)
   - [spa1](#spa1)
+- [開発手順](#開発手順)
 
 ## ローカルでの利用方法
 
-このリポジトリをGit cloneします。
+このリポジトリをgit cloneします。
 
 ### api1
 
@@ -33,3 +34,8 @@ npm run start:env
 ```
 
 ### spa1
+
+## 開発手順
+
+- api1 - [こちら](./how-to-develop-api.md)
+- spa1
