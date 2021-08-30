@@ -35,7 +35,20 @@ npm run start:env
 
 ### spa1
 
+spa1ディレクトリに移動したのち、パッケージをインストールします。
+
+```bash
+cd spa1
+npm ci
+```
+
+下記コマンドで実行します。
+
+```bash
+npm start
+```
+
 ## 開発手順
 
-- api1 - [こちら](./how-to-develop-api.md)
-- spa1
+- api1 - [こちら](./how-to-develop-api1.md)
+- spa1 - [こちら](./how-to-develop-spa1.md)
