@@ -4,6 +4,8 @@
 - [プロジェクト新規作成](#プロジェクト新規作成)
 - [環境変数設定](#環境変数設定)
 - [CORS対応](#cors対応)
+- [認証](#認証)
+  - [ログイン・ログアウト](#ログインログアウト)
 
 ## プロジェクト新規作成
 
@@ -135,4 +137,84 @@ app.use(cookieParser());
 app.use(require('./middlewares/myCors'));
 
 app.use('/', require('./routes/index'));
+```
+
+## 認証
+
+認証に利用するJSON Web Token(JWT)のパッケージをインストールします。
+
+```bash
+npm install jsonwebtoken
+```
+
+### ログイン・ログアウト
+
+ログイン・ログアウトのAPIを作成します。
+
+```bash
+touch routes/auth.js
+```
+
+```js:routes/auth.js
+const express = require('express');
+const router = express.Router();
+const jwt = require('jsonwebtoken');
+
+router.post('/login', (req, res) => {
+  const { id, password } = req.body;
+  
+  /**
+   * 本来はここでID・パスワードの検証を行いますが、
+   * 今回は便宜上、IDとパスワードに入力があれば全てOKとしています。
+   */
+  if (id && password) {
+    const jwtMaxAgeSeconds = parseInt(process.env.JWT_MAX_AGE_MINUTES) * 60;
+    // トークンを生成します。
+    const token = jwt.sign(
+      {
+        id
+      },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: jwtMaxAgeSeconds
+      }
+    );
+    // 生成したトークンをCookieにセットします。
+    res.cookie('token', token, {
+      httpOnly: true,
+      maxAge: jwtMaxAgeSeconds * 1000
+    });
+    res.json({
+      id,
+      name: `ユーザー${id}` // 便宜上、ユーザー名を 「"ユーザー" + ID」に設定しています。
+    });
+  } else {
+    res.status(422).json({
+      message: 'Invalid id or password.'
+    });
+  }
+});
+
+router.post('/logout', (req, res) => {
+  // Cookieのトークンを削除します。
+  res.clearCookie('token');
+  res.status(204).end();
+});
+
+module.exports = router;
+```
+
+`.env`を編集して、認証（JWT）の設定を追加します。
+
+```:.env
+JWT_MAX_AGE_MINUTES=1440
+JWT_SECRET=vv2Gp6cuEob4isb6B
+```
+
+`app.js`を編集して、作成したログイン・ログアウトAPIを追加します。
+
+```js:app.js
+app.use('/', require('./routes/index'));
+// 下記1行を追加します。
+app.use('/auth', require('./routes/auth'));
 ```

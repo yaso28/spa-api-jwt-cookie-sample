@@ -12,5 +12,6 @@ app.use(cookieParser());
 app.use(require('./middlewares/myCors'));
 
 app.use('/', require('./routes/index'));
+app.use('/auth', require('./routes/auth'));
 
 module.exports = app;
