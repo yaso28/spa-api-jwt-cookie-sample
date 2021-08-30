@@ -2,6 +2,7 @@
 # api1 開発手順
 
 - [プロジェクト新規作成](#プロジェクト新規作成)
+- [環境変数設定](#環境変数設定)
 
 ## プロジェクト新規作成
 
@@ -53,3 +54,31 @@ module.exports = router;
 // 下記1行を追加します。
 app.use('/', require('./routes/index'));
 ```
+
+## 環境変数設定
+
+環境変数をファイル管理するパッケージをインストールします。
+
+```bash
+npm install dotenv
+```
+
+`package.json`を編集して、環境変数をファイルから読み込んで実行するコマンドを追加します。
+
+```diff:package.json
+-    "start": "node ./bin/www"
++    "start": "node ./bin/www",
++    "start:env": "node -r dotenv/config ./bin/www"
+```
+
+環境変数を設定するファイルを追加します。
+
+```bash
+touch .env
+```
+
+```:.env
+PORT=8000
+```
+
+> ポート8000で実行するように設定します。
