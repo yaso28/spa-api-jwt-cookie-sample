@@ -95,6 +95,13 @@ nav ul {
 nav li {
   margin-right: 1rem;
 }
+
+nav li a {
+  text-decoration: none;
+  color: white;
+  background-color: gray;
+  padding: 5px;
+}
 ```
 
 ```jsx:src/components/Footer.js
