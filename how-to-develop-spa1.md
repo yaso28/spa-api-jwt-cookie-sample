@@ -5,6 +5,7 @@
 - [ページ遷移](#ページ遷移)
 - [API呼び出し](#api呼び出し)
 - [認証](#認証)
+- [各ページの実装](#各ページの実装)
 
 ## プロジェクト新規作成
 
@@ -323,7 +324,7 @@ REACT_APP_AUTH_MAX_AGE_MINUTES=1200
 - 認証の有無に応じて、ナビゲーションリンクを切り替えます。
 - ログアウトの処理を実装します。
 
-```js:src/components/Header.js
+```jsx:src/components/Header.js
 import { NavLink, useHistory } from 'react-router-dom';
 import './Header.css';
 import { useCookies } from 'react-cookie';
@@ -372,3 +373,141 @@ export default Header;
 ```
 
 > Cookieにおけるユーザー名の有無によって、認証状態を管理する仕様にしてします。
+
+## 各ページの実装
+
+`src/pages/Home.js`を編集します。
+
+```jsx:src/pages/Home.js
+import { useState, useEffect } from 'react';
+import apiCall from '../services/apiCall';
+
+const Home = () => {
+  const [message, setMessage] = useState('');
+
+  useEffect(() => {
+    const getMessage = async () => {
+      try {
+        const response = await apiCall.getIndex();
+        setMessage(response.data.message);
+      } catch (e) {
+        alert(e.message);
+      }
+    };
+    getMessage();
+  }, []);
+
+  return (
+    <>
+      <h1>Home</h1>
+      
+      <p>{message}</p>
+    </>
+  );
+};
+
+export default Home;
+```
+
+`src/pages/MyPage.js`を編集します。
+
+```jsx:src/pages/MyPage.js
+import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import apiCall from '../services/apiCall';
+
+const MyPage = () => {
+  const [pointList, setPointList] = useState([]);
+
+  useEffect(() => {
+    const getPointList = async () => {
+      try {
+        const response = await apiCall.getPointList();
+        setPointList(response.data);
+      } catch (e) {
+        alert(e.message);
+      }
+    };
+    getPointList();
+  }, []);
+
+  return (
+    <>
+      <h1>MyPage</h1>
+
+      <h2>Points</h2>
+      <ul>
+        {pointList.map((pointRow) =>
+          <li key={pointRow.id}>
+            <Link to={`/point/${pointRow.id}`}>{pointRow.month}</Link>
+          </li>
+        )}
+      </ul>
+    </>
+  );
+};
+
+export default MyPage;
+```
+
+`src/pages/Point.js`を編集します。
+
+```jsx:src/pages/Point.js
+import { useState, useEffect } from 'react';
+import { Link, useParams } from 'react-router-dom';
+import apiCall from '../services/apiCall';
+
+const Point = () => {
+  const { id } = useParams();
+  const [point, setPoint] = useState(null);
+
+  useEffect(() => {
+    const getPoint = async (id) => {
+      try {
+        const response = await apiCall.getPoint(id);
+        setPoint(response.data);
+      } catch (e) {
+        setPoint(null);
+        alert(e.message);
+      }
+    };
+    getPoint(id);
+  }, [id]);
+
+  return (
+    <>
+      <h1>Point</h1>
+
+      {point &&
+        <>
+          <h2>{point.month}</h2>
+          <table>
+            <tbody>
+              <tr>
+                <th>Acquired</th>
+                <td>{point.acquired} points</td>
+              </tr>
+              <tr>
+                <th>Used</th>
+                <td>{point.used} points</td>
+              </tr>
+              <tr>
+                <th>Remained</th>
+                <td>{point.remained} points</td>
+              </tr>
+            </tbody>
+          </table>
+        </>
+      }
+
+      <ul>
+        <li><Link to={`/point/${parseInt(id) - 1}`}>Previous</Link></li>
+        <li><Link to={`/point/${parseInt(id) + 1}`}>Next</Link></li>
+        <li><Link to="/my-page">Back</Link></li>
+      </ul>
+    </>
+  );
+};
+
+export default Point;
+```
