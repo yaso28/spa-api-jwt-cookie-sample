@@ -4,6 +4,7 @@
 - [プロジェクト新規作成](#プロジェクト新規作成)
 - [ページ遷移](#ページ遷移)
 - [API呼び出し](#api呼び出し)
+- [認証](#認証)
 
 ## プロジェクト新規作成
 
@@ -229,3 +230,138 @@ const apiCall = {
 
 export default apiCall;
 ```
+
+## 認証
+
+認証状態の管理をCookieで行うため、Cookieを操作するパッケージをインストールします。
+
+```bash
+npm install react-cookie
+```
+
+`src/pages/Login.js`を編集して、ログインフォームを実装します。
+
+```src/pages/Login.js
+import { useState, useEffect } from 'react';
+import { useHistory } from 'react-router-dom';
+import { useCookies } from 'react-cookie';
+import apiCall from '../services/apiCall';
+
+const Login = () => {
+  const [id, setId] = useState('');
+  const [password, setPassword] = useState('');
+
+  const history = useHistory();
+  const [cookies, setCookie] = useCookies();
+
+  const onIdChange = (event) => {
+    setId(event.target.value);
+  };
+  const onPasswordChange = (event) => {
+    setPassword(event.target.value);
+  };
+  const onSubmit = async (event) => {
+    event.preventDefault();
+
+    if (!id || !password) {
+      alert('ID and password required.');
+      return;
+    };
+    
+    try {
+      const response = await apiCall.login({ id, password });
+      // Cookieにユーザー名をセットします。
+      setCookie('username', response.data.name, { maxAge: process.env.REACT_APP_AUTH_MAX_AGE_MINUTES * 60 });
+    } catch (e) {
+      alert(e.message);
+    }
+  };
+
+  useEffect(() => {
+    if (cookies.username) {
+      history.push('/my-page');
+    }
+  }, [cookies, history]);
+
+  return (
+    <>
+      <h1>Login</h1>
+
+      <form onSubmit={onSubmit}>
+        <div>
+          <label>ID: <input type="text" value={id} onChange={onIdChange} /></label>
+        </div>
+        <div>
+          <label>Password: <input type="text" value={password} onChange={onPasswordChange} /></label>
+        </div>
+        <div>
+          <input type="submit" value="Login" />
+        </div>
+      </form>
+    </>
+  );
+};
+
+export default Login;
+```
+
+`.env.development.local`を編集して、認証状態管理の設定を追加します。
+
+```:.env.development.local
+REACT_APP_AUTH_MAX_AGE_MINUTES=1200
+```
+
+`src/components/Header.js`を編集します。
+
+- 認証の有無に応じて、ナビゲーションリンクを切り替えます。
+- ログアウトの処理を実装します。
+
+```js:src/components/Header.js
+import { NavLink, useHistory } from 'react-router-dom';
+import './Header.css';
+import { useCookies } from 'react-cookie';
+import apiCall from '../services/apiCall';
+
+const Header = () => {
+  const [cookies, , removeCookie] = useCookies();
+  const history = useHistory();
+
+  const onLogoutClick = async (event) => {
+    event.preventDefault();
+    try {
+      await apiCall.logout();
+      // Cookieのユーザー名を削除します。
+      removeCookie('username');
+      history.push('/login');
+    } catch (e) {
+      alert(e.message);
+    }
+  };
+
+  return (
+    <header>
+      <nav>
+        <ul>
+          <li>Welcome, {cookies.username ?? 'Guest'} !</li>
+          <li><NavLink exact to="/">Home</NavLink></li>
+          {cookies.username
+            ?
+            <>
+              <li><NavLink exact to="/my-page">My Page</NavLink></li>
+              <li><a href="#!" onClick={onLogoutClick}>Logout</a></li>
+            </>
+            :
+            <>
+              <li><NavLink exact to="/login">Login</NavLink></li>
+            </>
+            }
+        </ul>
+      </nav>
+    </header>
+  );
+};
+
+export default Header;
+```
+
+> Cookieにおけるユーザー名の有無によって、認証状態を管理する仕様にしてします。
