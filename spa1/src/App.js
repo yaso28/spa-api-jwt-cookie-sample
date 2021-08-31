@@ -17,7 +17,7 @@ const App = () => {
             <Route path="/" exact component={Home} />
             <Route path="/login" exact component={Login} />
             <Route path="/my-page" exact component={MyPage} />
-            <Route path="/point" exact component={Point} />
+            <Route path="/point/:id" exact component={Point} />
           </Switch>
         </main>
         <Footer />

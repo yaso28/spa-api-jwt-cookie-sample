@@ -70,7 +70,7 @@ const Header = () => {
           <li><NavLink exact to="/">Home</NavLink></li>
           <li><NavLink exact to="/login">Login</NavLink></li>
           <li><NavLink exact to="/my-page">My Page</NavLink></li>
-          <li><NavLink exact to="/point">Point</NavLink></li>
+          <li><NavLink exact to="/point/1">Point</NavLink></li>
         </ul>
       </nav>
     </header>
@@ -142,7 +142,7 @@ const App = () => {
             <Route path="/" exact component={Home} />
             <Route path="/login" exact component={Login} />
             <Route path="/my-page" exact component={MyPage} />
-            <Route path="/point" exact component={Point} />
+            <Route path="/point/:id" exact component={Point} />
           </Switch>
         </main>
         <Footer />
