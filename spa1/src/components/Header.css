@@ -1,0 +1,13 @@
+header {
+  border-bottom: 1px gray solid;
+}
+
+nav ul {
+  list-style: none;
+  display: flex;
+  padding: 0 1rem;
+}
+
+nav li {
+  margin-right: 1rem;
+}

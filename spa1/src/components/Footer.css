@@ -1,0 +1,7 @@
+footer {
+  display: flex;
+  min-height: 50px;
+  justify-content: center;
+  align-items: center;
+  border-top: 1px gray solid;
+}
