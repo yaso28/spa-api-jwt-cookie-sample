@@ -6,6 +6,7 @@ import Home from './pages/Home';
 import Login from './pages/Login';
 import MyPage from './pages/MyPage';
 import Point from './pages/Point';
+import NotFound from './pages/NotFound';
 
 const App = () => {
   return (
@@ -18,6 +19,7 @@ const App = () => {
             <Route path="/login" exact component={Login} />
             <Route path="/my-page" exact component={MyPage} />
             <Route path="/point/:id" exact component={Point} />
+            <Route component={NotFound} />
           </Switch>
         </main>
         <Footer />
