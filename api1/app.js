@@ -14,4 +14,7 @@ app.use(require('./middlewares/myCors'));
 app.use('/', require('./routes/index'));
 app.use('/auth', require('./routes/auth'));
 
+const verifyAuth = require('./middlewares/verifyAuth');
+app.use('/point', verifyAuth, require('./routes/point'));
+
 module.exports = app;

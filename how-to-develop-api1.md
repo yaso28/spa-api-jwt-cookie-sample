@@ -6,6 +6,7 @@
 - [CORS対応](#cors対応)
 - [認証](#認証)
   - [ログイン・ログアウト](#ログインログアウト)
+  - [検証](#検証)
 
 ## プロジェクト新規作成
 
@@ -217,4 +218,101 @@ JWT_SECRET=vv2Gp6cuEob4isb6B
 app.use('/', require('./routes/index'));
 // 下記1行を追加します。
 app.use('/auth', require('./routes/auth'));
+```
+
+### 検証
+
+認証済みかどうか検証するmiddlewareを作成します。
+
+```bash
+touch middlewares/verifyAuth.js
+```
+
+```js:middlewares/verifyAuth.js
+const jwt = require('jsonwebtoken');
+
+const verifyAuth = (req, res, next) => {
+  try {
+    // Cookieにあるトークンを検証します。
+    const token = jwt.verify(req.cookies.token, process.env.JWT_SECRET);
+    // 認証済みユーザー情報をリクエストにセットします。
+    req.user = {
+      id: token.id
+    };
+    next();
+  } catch {
+    res.status(401).json({
+      message: 'Authentication required.'
+    });
+  }
+};
+
+module.exports = verifyAuth;
+```
+
+認証で保護対象とするAPIを作成します。
+
+```bash
+touch routes/point.js
+```
+
+```js:routes/point.js
+const express = require('express');
+const router = express.Router();
+
+// 今回は便宜上、データ取得処理を簡易的に作っています。（ここから）
+const createMonth = (monthDiff) => {
+  const date = new Date();
+  date.setDate(1);
+  date.setMonth(date.getMonth() + monthDiff);
+  const year = date.getFullYear();
+  const month = date.getMonth() + 1;
+  return `${year}年${month}月`;
+};
+const getPointList = (user) => {
+  return [
+    { id: 1, month: createMonth(-3), user_id: user.id, acquired: 12, used: 10, remained: 251 },
+    { id: 2, month: createMonth(-2), user_id: user.id, acquired: 11, used: 15, remained: 247 },
+    { id: 3, month: createMonth(-1), user_id: user.id, acquired: 14, used: 11, remained: 250 },
+  ];
+};
+// 今回は便宜上、データ取得処理を簡易的に作っています。（ここまで）
+
+router.get('/list', (req, res) => {
+  // verifyAuthでセットした認証済みユーザー情報をここで取得できます。
+  const user = req.user;
+
+  const pointList = getPointList(user);
+  const resultList = pointList.map(row => ({ id: row.id, month: row.month }));
+  res.json(resultList);
+});
+
+router.get('/get/:id', (req, res) => {
+  // verifyAuthでセットした認証済みユーザー情報をここで取得できます。
+  const user = req.user;
+
+  const id = parseInt(req.params.id);
+  const pointList = getPointList(user);
+  const pointRow = pointList.find(row => row.id === id);
+
+  if (pointRow) {
+    res.json(pointRow);
+  } else {
+    res.status(404).json({
+      message: 'Not found.'
+    });
+  };
+});
+
+module.exports = router;
+```
+
+`app.js`を編集して、作成したAPIを認証で保護して追加します。
+
+```js:app.js
+app.use('/auth', require('./routes/auth'));
+
+// 下記2行を追加します。
+const verifyAuth = require('./middlewares/verifyAuth');
+app.use('/point', verifyAuth, require('./routes/point'));
 ```
