@@ -7,6 +7,7 @@ import Login from './pages/Login';
 import MyPage from './pages/MyPage';
 import Point from './pages/Point';
 import NotFound from './pages/NotFound';
+import AuthRoute from './components/AuthRoute';
 
 const App = () => {
   return (
@@ -17,8 +18,8 @@ const App = () => {
           <Switch>
             <Route path="/" exact component={Home} />
             <Route path="/login" exact component={Login} />
-            <Route path="/my-page" exact component={MyPage} />
-            <Route path="/point/:id" exact component={Point} />
+            <AuthRoute path="/my-page" exact component={MyPage} />
+            <AuthRoute path="/point/:id" exact component={Point} />
             <Route component={NotFound} />
           </Switch>
         </main>

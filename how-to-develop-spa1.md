@@ -5,6 +5,8 @@
 - [ページ遷移](#ページ遷移)
 - [API呼び出し](#api呼び出し)
 - [認証](#認証)
+  - [ログイン・ログアウト](#ログインログアウト)
+  - [検証](#検証)
 - [各ページの実装](#各ページの実装)
 
 ## プロジェクト新規作成
@@ -250,6 +252,8 @@ export default apiCall;
 npm install react-cookie
 ```
 
+### ログイン・ログアウト
+
 `src/pages/Login.js`を編集して、ログインフォームを実装します。
 
 ```src/pages/Login.js
@@ -376,6 +380,53 @@ export default Header;
 ```
 
 > Cookieにおけるユーザー名の有無によって、認証状態を管理する仕様にしてします。
+
+### 検証
+
+ページ遷移のうち特定のルートを認証で保護します。
+
+認証がなければリダイレクトするルートコンポーネントを作成します。
+
+```bash
+touch src/components/AuthRoute.js
+```
+
+```jsx:src/components/AuthRoute.js
+import { useCookies } from 'react-cookie';
+import { Redirect, Route } from 'react-router-dom';
+
+const AuthRoute = (props) => {
+  const [cookies] = useCookies();
+
+  // Cookieのユーザー名の有無によって認証の有無を判別します。
+  if (cookies.username) {
+    return <Route {...props} />
+  } else {
+    return <Redirect from={props.path} to="/login" />
+  }
+};
+
+export default AuthRoute;
+```
+
+`src/App.js`を編集して、特定のルートを認証で保護します。
+
+```diff:src/App.js
+ import NotFound from './pages/NotFound';
++import AuthRoute from './components/AuthRoute';
+
+ // ...省略
+
+           <Switch>
+             <Route path="/" exact component={Home} />
+             <Route path="/login" exact component={Login} />
+-            <Route path="/my-page" exact component={MyPage} />
+-            <Route path="/point/:id" exact component={Point} />
++            <AuthRoute path="/my-page" exact component={MyPage} />
++            <AuthRoute path="/point/:id" exact component={Point} />
+             <Route component={NotFound} />
+           </Switch>
+```
 
 ## 各ページの実装
 
