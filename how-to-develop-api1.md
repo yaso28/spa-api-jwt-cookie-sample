@@ -110,8 +110,8 @@ const myCors = (req, res, next) => {
 
     if (req.method === 'OPTIONS') {
       // Preflight Request対応
-      res.header('Access-Control-Allow-Methods', '*');
-      res.header('Access-Control-Allow-Headers', '*');
+      res.header('Access-Control-Allow-Methods', 'POST');
+      res.header('Access-Control-Allow-Headers', 'Content-Type');
       return res.status(204).end();
     }
   }
