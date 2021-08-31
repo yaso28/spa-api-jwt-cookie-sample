@@ -41,6 +41,13 @@ spa1ディレクトリに移動したのち、パッケージをインストー�
 cd spa1
 npm ci
 ```
+環境変数設定ファイルをコピーします。
+
+```bash
+cp .env.development.local.example .env.development.local
+```
+
+> コピーした`.env.development.local`ファイルを必要に応じて編集します。
 
 下記コマンドで実行します。
 
